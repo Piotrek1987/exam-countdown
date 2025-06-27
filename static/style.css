@@ -1,0 +1,74 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    background-image: url('images/logo.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 30px;
+    min-height: 100vh;
+}
+
+h1.current-time-box,
+h1.countdown-box {
+    font-size: 7.5rem; /* Increased 1.5x from previous 5rem */
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    margin: 30px auto;
+    border-radius: 20px;
+    max-width: 900px;
+    color: #ffffff;
+}
+
+h2, h3 {
+    font-size: 1.5rem;
+    margin: 10px 0;
+}
+
+h2, label {
+    color: #000000; /* Ensuring contrast against white parts of bg */
+    background-color: rgba(255, 255, 255, 0.75);
+    padding: 5px 10px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+label, input, button {
+    font-size: 1.2rem;
+    margin: 10px;
+    padding: 10px;
+}
+
+input {
+    width: 80px;
+}
+
+button {
+    cursor: pointer;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background-color: #1e40af;
+}
+
+.breadcrumbs {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.breadcrumbs a {
+    color: #a5b4fc;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+.breadcrumbs a:hover {
+    text-decoration: underline;
+}

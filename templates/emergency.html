@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Exam Countdown - Emergency</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="breadcrumbs">
+        <a href="/">Countdown</a> |
+        <a href="/emergency">Set End Time</a>
+        <div style="margin-top: 10px;">
+            <button onclick="toggleFullscreen()">Toggle Fullscreen</button>
+        </div>
+    </div>
+
+    <h2 style="color: black;">Current time:</h2>
+    <h1 id="current-time" class="current-time-box"></h1>
+
+    <h1 id="countdown" class="countdown-box">00:00:00</h1>
+
+    <div>
+        <label style="color: black;">Set specific end time:</label><br>
+        <input type="time" id="endTimeInput">
+        <br>
+        <button onclick="setCountdownToTime()">Start</button>
+        <button onclick="restartCountdown()">Restart</button>
+    </div>
+
+    <h3 id="end-time-display" style="color: black; background-color: rgba(255,255,255,0.75); display: inline-block; padding: 5px 10px; border-radius: 8px;"></h3>
+
+    <audio id="tenMinSound" src="{{ url_for('static', filename='sounds/ten_min.wav') }}"></audio>
+    <audio id="fiveMinSound" src="{{ url_for('static', filename='sounds/five_min.wav') }}"></audio>
+    <audio id="endSound" src="{{ url_for('static', filename='sounds/end.wav') }}"></audio>
+
+    <script>
+        let countdownInterval;
+        let endTime = null;
+
+        function updateCurrentTime() {
+            const now = new Date();
+            document.getElementById("current-time").textContent = now.toLocaleTimeString();
+        }
+        setInterval(updateCurrentTime, 1000);
+        updateCurrentTime();
+
+        function setCountdownToTime() {
+            const input = document.getElementById("endTimeInput").value;
+            if (!input) return;
+
+            const [hours, minutes] = input.split(":").map(Number);
+            const now = new Date();
+            endTime = new Date();
+            endTime.setHours(hours, minutes, 0, 0);
+
+            // If selected time is earlier today, roll to next day
+            if (endTime <= now) {
+                endTime.setDate(endTime.getDate() + 1);
+            }
+
+            saveCountdown(endTime);
+            runCountdown();
+        }
+
+        function runCountdown() {
+            clearInterval(countdownInterval);
+            if (!endTime) return;
+
+            document.getElementById("end-time-display").textContent =
+                "Your countdown is going to end at " + endTime.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+
+            countdownInterval = setInterval(() => {
+                const now = new Date();
+                const timeLeft = Math.floor((endTime - now) / 1000);
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    document.getElementById("countdown").textContent = "00:00:00";
+                    localStorage.removeItem("emergencyEndTime");
+                    document.getElementById("endSound").play();
+                    return;
+                }
+
+                if (timeLeft === 600) document.getElementById("tenMinSound").play();
+                if (timeLeft === 300) document.getElementById("fiveMinSound").play();
+
+                const h = String(Math.floor(timeLeft / 3600)).padStart(2, '0');
+                const m = String(Math.floor((timeLeft % 3600) / 60)).padStart(2, '0');
+                const s = String(timeLeft % 60).padStart(2, '0');
+                document.getElementById("countdown").textContent = `${h}:${m}:${s}`;
+            }, 1000);
+        }
+
+        function restartCountdown() {
+            clearInterval(countdownInterval);
+            endTime = null;
+            localStorage.removeItem("emergencyEndTime");
+            document.getElementById("countdown").textContent = "00:00:00";
+            document.getElementById("end-time-display").textContent = "";
+        }
+
+        function saveCountdown(endTime) {
+            localStorage.setItem("emergencyEndTime", endTime.toISOString());
+        }
+
+        function restoreCountdown() {
+            const savedTime = localStorage.getItem("emergencyEndTime");
+            if (savedTime) {
+                const parsed = new Date(savedTime);
+                if (parsed > new Date()) {
+                    endTime = parsed;
+                    runCountdown();
+                } else {
+                    localStorage.removeItem("emergencyEndTime");
+                }
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        restoreCountdown();
+    </script>
+</body>
+</html>
